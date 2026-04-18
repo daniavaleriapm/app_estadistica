@@ -83,3 +83,43 @@ with col2:
     sns.boxplot(x=data, color="#4F766F", ax=ax)
     ax.set_title("Boxplot")
     st.pyplot(fig)
+
+#autoevaluacion
+    with st.expander("📝 Análisis del estudiante"):
+    normal = st.radio("¿Distribución normal?", ["Sí", "No", "No sé"])
+    sesgo = st.text_area("¿Hay sesgo u outliers?")
+
+#prueba z y validacion
+    st.header("🧪 Prueba Z")
+
+n = len(data)
+x_bar = data.mean()
+
+colA, colB = st.columns(2)
+
+with colA:
+    h0 = st.number_input("H0: μ =", value=float(x_bar))
+    sigma = st.number_input("σ poblacional", value=float(data.std()), min_value=0.1)
+    alpha = st.slider("α", 0.01, 0.10, 0.05)
+    tipo = st.selectbox("Tipo", ["Bilateral", "Derecha", "Izquierda"])
+
+    if n < 30:
+    st.warning("⚠️ n < 30, la prueba Z puede no ser válida")
+
+#calculos
+z = (x_bar - h0) / (sigma / np.sqrt(n))
+
+if tipo == "Bilateral":
+    p = 2 * (1 - stats.norm.cdf(abs(z)))
+    zc = stats.norm.ppf(1 - alpha/2)
+    reject = abs(z) > zc
+
+elif tipo == "Derecha":
+    p = 1 - stats.norm.cdf(z)
+    zc = stats.norm.ppf(1 - alpha)
+    reject = z > zc
+
+else:
+    p = stats.norm.cdf(z)
+    zc = stats.norm.ppf(alpha)
+    reject = z < zc
